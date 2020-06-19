@@ -3,7 +3,7 @@
         <h1 class="#f3e5f5 purple lighten-5 center">[Rails+Vue.js]~Bookshelf~</h1>
         <div class="row #e3f2fd blue lighten-5">
             <div class="col s4 m6" v-for="book in books">
-                <div class="card btn">
+                <div class="card">
           <span class="card-title" v-on:click="setBookInfo(book.id)">
             {{ book.title }}
           </span>
@@ -37,42 +37,25 @@
 
 <script>
     import axios from 'axios'
+    import { mapState, mapMutations } from 'vuex'
 
     export default {
         name: 'BookHome',
-        data: function() {
-            return {
-                bookInfo: {},
-                bookInfoBool: false,
-                books: [],
-            }
-        },
+        computed: mapState([
+            'books',
+            'bookInfo',
+            'bookInfoBool'
+        ]),
         mounted: function() {
-            this.fetchBooks();
+            this.$store.commit('fetchBooks')
         },
         methods: {
-            fetchBooks() {
-                axios.get('/api/books').then((res) => {
-                    for(var i = 0; i < res.data.books.length; i++) {
-                        this.books.push(res.data.books[i]);
-                    }
-                }, (error) => {
-                    console.log(error);
-                });
-            },
-            setBookInfo(id){
-                axios.get(`api/books/${id}.json`).then(res => {
-                    this.bookInfo = res.data;
-                    this.bookInfoBool = true;
-                });
+            setBookInfo(id) {
+                this.$store.commit('setBookInfo', { id })
             },
             deleteBook(id) {
-                axios.delete(`/api/books/${id}`).then(res => {
-                    this.books = [];
-                    this.bookInfo = '';
-                    this.bookInfoBool = false;
-                    this.fetchBooks();
-                })
+                this.$store.commit('deleteBook', { id })
+                this.$store.commit('fetchBooks')
             },
         }
     }
